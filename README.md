@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" width="96" height="96" alt="s3ctl">
 </p>
 
-<h1 align="center">homebrew-s3ctl</h1>
+<h1 align="center">s3ctl</h1>
 
 <p align="center">
   Homebrew tap for <a href="https://github.com/netspeedy/s3ctl"><strong>s3ctl</strong></a> — a single-binary CLI for creating S3-compatible buckets and issuing bucket-scoped credentials.
