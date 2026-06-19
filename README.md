@@ -1,6 +1,8 @@
 <p align="center">
-  <img src="assets/readme-card.svg" width="600" alt="s3ctl">
+  <img src="assets/logo.svg" width="96" height="96" alt="s3ctl">
 </p>
+
+<h1 align="center">homebrew-s3ctl</h1>
 
 <p align="center">
   Homebrew tap for <a href="https://github.com/netspeedy/s3ctl"><strong>s3ctl</strong></a> — a single-binary CLI for creating S3-compatible buckets and issuing bucket-scoped credentials.
@@ -13,6 +15,8 @@
   <a href="https://github.com/netspeedy/s3ctl"><img src="https://img.shields.io/badge/source-netspeedy%2Fs3ctl-00897B?style=flat-square" alt="Source"></a>
   <a href="https://buymeacoffee.com/soakes"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=000000" alt="Buy Me a Coffee"></a>
 </p>
+
+---
 
 ## Install
 
