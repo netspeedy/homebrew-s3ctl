@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" width="300" alt="s3ctl">
+  <img src="og-image.svg" width="720" alt="s3ctl">
 </p>
 
 <h1 align="center">homebrew-s3ctl</h1>
