@@ -1,11 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" width="96" height="96" alt="s3ctl">
-</p>
-
-<h1 align="center">s3ctl</h1>
-
-<p align="center">
-  Homebrew tap for <a href="https://github.com/netspeedy/s3ctl"><strong>s3ctl</strong></a> — a single-binary CLI for creating S3-compatible buckets and issuing bucket-scoped credentials.
+  <img src="assets/s3ctl-readme-hero.png" width="960" alt="s3ctl - Provision S3 buckets with scoped credentials">
 </p>
 
 <p align="center">
