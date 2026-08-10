@@ -1,27 +1,27 @@
 class S3ctl < Formula
   desc "S3-compatible bucket provisioning and scoped credential automation"
   homepage "https://github.com/netspeedy/s3ctl"
-  version "0.8.14"
+  version "0.8.15"
   license "MIT"
 
   if OS.mac?
     if Hardware::CPU.arm?
-      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.14/s3ctl-darwin-arm64.tar.gz"
-      sha256 "c07214fe4eecf8dbb658c95035bae1a54cd7980a21f4f71d90f0409d8192d8c0"
+      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.15/s3ctl-darwin-arm64.tar.gz"
+      sha256 "143d65e35449c7281acb82328ce8433f62749645ca09a8d42ed12e1fc0108790"
     else
-      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.14/s3ctl-darwin-amd64.tar.gz"
-      sha256 "81697483ccb48d4a34c6dd737f20fd9940adfd3c0c37d27cea94b207128b0722"
+      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.15/s3ctl-darwin-amd64.tar.gz"
+      sha256 "d4c6102bff79d0c7fc67e085e448e459754abd508b773630850b59866bb71302"
     end
   elsif OS.linux?
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.14/s3ctl-linux-arm64.tar.gz"
-      sha256 "20f69017fd0a53eeda3497e5312fc40acb47792391f4e0685a5effd444f899fa"
+      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.15/s3ctl-linux-arm64.tar.gz"
+      sha256 "d55ebb5c565f2604fffd8527ad524d7f4bec7db7ab44c5bed9a8a854d8b7aecb"
     elsif Hardware::CPU.arm?
-      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.14/s3ctl-linux-armv7.tar.gz"
-      sha256 "a96cb59b92715d9f4e14b9efd22db1b8aa4b960bdcc57418559596502990e92d"
+      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.15/s3ctl-linux-armv7.tar.gz"
+      sha256 "64b3eda4d2ae2f82689032f701ee32e75825c28449d26ba1d5154c2c851282fb"
     else
-      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.14/s3ctl-linux-amd64.tar.gz"
-      sha256 "c46018edf408d89b64cebf4728eb774eded31cdd002ddadacae27be52d0a4d33"
+      url "https://github.com/netspeedy/s3ctl/releases/download/v0.8.15/s3ctl-linux-amd64.tar.gz"
+      sha256 "9a51d4fb8dee6e4421b0a4111bcf159e6138e95061dcffb4a7f3aba05124c7c7"
     end
   end
 
