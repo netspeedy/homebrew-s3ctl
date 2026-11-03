@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/s3ctl-readme-hero.svg" width="960" alt="s3ctl - one key, one bucket. Each key's policy names one bucket, so a leaked key gets 403 AccessDenied everywhere else.">
+  <img src="assets/s3ctl-readme-hero.svg" width="960" alt="s3ctl - no console clicking, no IAM drift. Buckets, versioning, policies and scoped keys from flags, JSON or a CSV batch.">
 </p>
 
 <p align="center">
