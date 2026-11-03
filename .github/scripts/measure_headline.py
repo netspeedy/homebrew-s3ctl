@@ -9,7 +9,7 @@ on first use and cached beside this script as inter-latin.ttf (gitignored).
 Needs fonttools, brotli and uharfbuzz, which build_readme_hero.py itself does not:
 
     python3 -m venv /tmp/hero && /tmp/hero/bin/pip install fonttools brotli uharfbuzz
-    /tmp/hero/bin/python .github/scripts/measure_headline.py 44 800 -1.3 "One " "key" "One key,"
+    /tmp/hero/bin/python .github/scripts/measure_headline.py 44 800 -1.3 "No " "console"
 
 usage: measure_headline.py SIZE WEIGHT LETTER_SPACING "text" ["text" ...]
 """

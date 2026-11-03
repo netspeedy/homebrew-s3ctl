@@ -2,20 +2,22 @@
 """Build the animated README hero, assets/s3ctl-readme-hero.svg.
 
 The banner follows the soakes/cv README hero: the bucket mark, a two-line headline, a short body
-and a meta row on the left, and a generated scene on the right. The scene is a three by three
-floor of bucket slabs. An access key sends a packet to its own bucket, app-data, which lights up
-with 200 OK, then to the next one, billing, which refuses it with 403 AccessDenied.
+and a meta row on the left, and a generated scene on the right. The scene is the bucket from
+assets/logo.svg drawn large in dots, with a scan running down it and the steps s3ctl takes
+(bucket, versioning, bucket policy, scoped key) lighting up beside it in turn.
 
-Edit the copy, layout or timing here and rerun rather than editing the generated SVG. The
-headline is positioned from measured advances (see ADVANCE); if you change its words, measure
-them again with measure_headline.py. Inter and JetBrains Mono (SIL Open Font License 1.1) are
-fetched from Google Fonts, subset to the characters the finished SVG renders, and embedded, so
-the hero renders the same on every platform. Needs network access.
+Edit the copy, layout or timing here and rerun this script rather than editing the generated
+SVG. netspeedy/s3ctl builds the same banner from the same script (make readme-hero there), so
+keep the two copies in step. The headline is positioned from measured advances (see ADVANCE);
+if you change its words, measure them again with measure_headline.py. Inter and JetBrains Mono
+(SIL Open Font License 1.1) are fetched from Google Fonts, subset to the characters the finished
+SVG renders, and embedded, so the hero renders the same on every platform. Needs network access.
 """
 
 from __future__ import annotations
 
 import base64
+import math
 import random
 import re
 import urllib.parse
@@ -69,10 +71,10 @@ COPY_BOX = (36, 30, 520, 340)
 # Headline advances in px, measured by measure_headline.py on Inter 800 at 44px (opsz 32,
 # letter-spacing -1.3). The swash and the gradients are placed from these.
 ADVANCE = {
-    "One ": 88.04,
-    "key": 69.64,
-    "One key,": 164.29,
-    "one bucket.": 228.13,
+    "No ": 63.17,
+    "console": 154.93,
+    "No console clicking.": 387.96,
+    "No IAM drift.": 243.21,
 }
 
 
@@ -379,201 +381,185 @@ def meta_row(labels: list[str]) -> str:
     )
 
 
-# Scene: isolation
-
-ISO_W, ISO_H, ISO_T = 80.0, 40.0, 16.0  # grid step (half a tile's width and height), slab depth
-ISO_O = (910.0, 214.0)  # centre of the middle tile's top face
-TILE = 0.84  # top faces are drawn smaller than the grid step, so gaps show between slabs
-OWN, OTHER = (0, 0), (1, -1)
-NAMES = {OWN: "app-data", OTHER: "billing"}
-KEY = (716.0, 104.0)  # the key hovers above and left of the floor; both packets start from it
-LOOP = 8.0
-TO_OWN = (0.0, 1.3)  # seconds into the loop that each packet leaves and lands
-TO_OTHER = (3.9, 5.1)
+# Scene: monolith
 
 
-def iso(i: int, j: int) -> tuple[float, float]:
-    return ISO_O[0] + (i - j) * ISO_W, ISO_O[1] + (i + j) * ISO_H
+MONO_CX, MONO_TOP = 944.0, 62.0  # centre of the rim
+MONO_RX0, MONO_RX1 = 172.0, 126.0  # radius at the rim and at the base, so the bucket tapers
+MONO_DEPTH = 300.0  # rim to base
+MONO_RY = 0.22  # each ring's height as a share of its width: the view from slightly above
 
 
-def poly(*points: tuple[float, float]) -> str:
-    return "M" + "L".join(f"{num(x)} {num(y)}" for x, y in points) + "Z"
+def radius(t: float) -> float:
+    return MONO_RX0 + (MONO_RX1 - MONO_RX0) * t / MONO_DEPTH
 
 
-def pct(seconds: float) -> float:
-    return seconds / LOOP * 100
+def surface(t: float, theta: float) -> tuple[float, float]:
+    r = radius(t)
+    return MONO_CX + r * math.sin(theta), MONO_TOP + t + r * MONO_RY * math.cos(theta)
 
 
-def packet(cls: str, d: str) -> str:
-    """A packet along `d`: a wide faint glow under a thin bright core."""
-    return (
-        f'<path class="{cls}" pathLength="100" d="{d}" fill="none" stroke="{AMBER}" '
-        'stroke-width="4.5" stroke-opacity="0.3" stroke-linecap="round" />'
-        f'<path class="{cls}" pathLength="100" d="{d}" fill="none" stroke="{AMBER_2}" '
-        'stroke-width="1.8" stroke-linecap="round" />'
+def front_arc(t: float, steps: int = 48) -> str:
+    points = [surface(t, -math.pi / 2 + math.pi * q / steps) for q in range(steps + 1)]
+    return "M" + "L".join(f"{num(x)} {num(y)}" for x, y in points)
+
+
+def scene_monolith() -> tuple[list[str], str, str, list[tuple[float, float, float, float]]]:
+    """The bucket mark as a dotted object, scanned top to bottom, with s3ctl's steps beside it."""
+    loop = 6.0
+    cx, top = MONO_CX, MONO_TOP
+    bottom = top + MONO_DEPTH
+    rx0, rx1 = MONO_RX0, MONO_RX1
+
+    points = []
+    t = 9.0
+    ring = 0
+    while t <= MONO_DEPTH:
+        r = radius(t)
+        count = int(2 * math.pi * r / 9.5)
+        for q in range(count):
+            theta = 2 * math.pi * (q + (ring & 1) * 0.5) / count
+            c = math.cos(theta)
+            if c <= 0.03:
+                continue
+            x, y = surface(t, theta)
+            band = 0 if c < 0.3 else 1 if c < 0.55 else 2 if c < 0.8 else 3
+            points.append((x, y, band))
+        t += 9.0
+        ring += 1
+    field = dot_paths(points, {0: (0.22, 1.2), 1: (0.38, 1.4), 2: (0.55, 1.55), 3: (0.72, 1.65)})
+
+    # The back half of the rim, down the right side, round the front of the base and back up.
+    rim = f"A{num(rx0)} {num(rx0 * MONO_RY)} 0 0 1 {num(cx + rx0)} {num(top)}"
+    base = f"A{num(rx1)} {num(rx1 * MONO_RY)} 0 0 1 {num(cx - rx1)} {num(bottom)}"
+    silhouette = f"M{num(cx - rx0)} {num(top)}{rim}L{num(cx + rx1)} {num(bottom)}{base}Z"
+    # The two bands across the logo's bucket.
+    bands = "".join(
+        f'<path d="{front_arc(MONO_DEPTH * f)}" fill="none" stroke="url(#bandGrad)" '
+        'stroke-width="2.4" stroke-linecap="round" />'
+        for f in (0.29, 0.58)
     )
-
-
-def packet_css(cls: str, leave: float, land: float) -> str:
-    """Hidden until `leave`, then a 16-unit dash runs the path's length and vanishes at `land`."""
-    start, end = pct(leave), pct(land)
-    return (
-        f".{cls}{{stroke-dasharray:16 120;stroke-dashoffset:16;opacity:0;"
-        f"animation:{cls} {LOOP}s linear infinite}}"
-        f"@keyframes {cls}{{0%,{start:.2f}%{{stroke-dashoffset:16;opacity:0}}"
-        f"{start + 0.01:.2f}%{{stroke-dashoffset:16;opacity:1}}"
-        f"{end:.2f}%{{stroke-dashoffset:-100;opacity:1}}"
-        f"{end + 0.01:.2f}%,100%{{stroke-dashoffset:-100;opacity:0}}}}"
-    )
-
-
-def scene_isolation() -> tuple[list[str], str, str, list[tuple[float, float, float, float]]]:
-    """A three by three floor of bucket slabs; the key reaches app-data and billing refuses it."""
-    w, h = ISO_W * TILE, ISO_H * TILE
-    tiles, dots, labels = [], [], []
-    cells = sorted(((i, j) for i in (-1, 0, 1) for j in (-1, 0, 1)), key=lambda c: c[0] + c[1])
-    for cell in cells:  # back to front
-        cx, cy = iso(*cell)
-        mine = cell == OWN
-        top = poly((cx, cy - h), (cx + w, cy), (cx, cy + h), (cx - w, cy))
-        left = poly((cx - w, cy), (cx, cy + h), (cx, cy + h + ISO_T), (cx - w, cy + ISO_T))
-        right = poly((cx, cy + h), (cx + w, cy), (cx + w, cy + ISO_T), (cx, cy + h + ISO_T))
-        tiles.append(
-            f'<path d="{left}" fill="#07101C" stroke="#1C2D44" stroke-width="0.8" />'
-            f'<path d="{right}" fill="#0A1626" stroke="#1C2D44" stroke-width="0.8" />'
-            f'<path d="{top}" fill="#0C1A2C" stroke="{CYAN if mine else "#4B6A8C"}" '
-            f'stroke-opacity="{0.7 if mine else 0.35}" stroke-width="1.1" />'
+    scans = []
+    step = 12.0
+    count = int(MONO_DEPTH / step)
+    sweep = 2.6
+    for k in range(count + 1):
+        delay = k * sweep / count
+        scans.append(
+            f'<path class="sc" d="{front_arc(k * step)}" fill="none" stroke="{CYAN_2}" '
+            f'stroke-width="1.3" style="animation-delay:{delay:.2f}s" />'
         )
-        # A dotted lattice on each top face.
-        for a in range(1, 8):
-            for b in range(1, 8):
-                u, v = a / 8, b / 8
-                dots.append((cx + (u - v) * w, cy - h + (u + v) * h, 1 if mine else 0))
-        if mine:
-            # The key's policy boundary, marching round its own bucket.
-            boundary = poly(
-                (cx, cy - h - 10), (cx + w + 20, cy), (cx, cy + h + 10), (cx - w - 20, cy)
-            )
-            tiles.append(
-                f'<path class="policy" d="{boundary}" fill="none" stroke="{CYAN}" '
-                'stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="5 5" />'
-            )
-        if cell == OTHER:
-            tiles.append(
-                f'<path class="deny" d="{top}" fill="{RED}" fill-opacity="0.12" stroke="{RED}" '
-                'stroke-width="1.6" />'
-            )
-        if mine:
-            tiles.append(
-                f'<path class="ok" d="{top}" fill="{GREEN}" fill-opacity="0.1" stroke="{GREEN}" '
-                'stroke-width="1.6" />'
-            )
-        # Stand each bucket on the middle of its face; the outline's base is 47/64 down the symbol.
-        # The name sits just below it, where the face is still wide enough to hold it.
-        size = 36 if mine else 30
-        base = cy + 3
-        tiles.append(
-            f'<use href="#bucket" x="{num(cx - size / 2)}" y="{num(base - size * 47 / 64)}" '
-            f'width="{size}" height="{size}" opacity="{1 if mine else 0.55}" />'
-        )
-        if cell in NAMES:
-            label = NAMES[cell]
-            if mono_width(len(label), 9, 0.4) / 2 > w * (1 - (base + 13.5 - cy) / h) - 6:
-                raise SystemExit(f"tile label {label!r} is wider than its tile face")
-            labels.append(
-                f'<text class="mono" x="{num(cx)}" y="{num(base + 13.5)}" text-anchor="middle" '
-                f'font-size="9" letter-spacing="0.4" fill="{INK if mine else INK_2}">'
-                f"{esc(label)}</text>"
-            )
 
-    kx, ky = KEY
-    ox, oy = iso(*OWN)
-    tx, ty = iso(*OTHER)
-    to_own = f"M{num(kx + 14)} {num(ky + 6)}Q{num(ox - 60)} {num(ky - 10)} {num(ox)} {num(oy - 36)}"
-    to_other = (
-        f"M{num(kx + 16)} {num(ky - 2)}Q{num((kx + tx) / 2)} {num(ky - 70)} "
-        f"{num(tx - 6)} {num(ty - 40)}"
+    # Keyhole on the front, where the logo puts it.
+    kt = MONO_DEPTH * 0.74
+    kx, ky = surface(kt, 0)
+    keyhole = (
+        f'<circle class="kh" cx="{num(kx)}" cy="{num(ky - 6)}" r="34" fill="url(#keyholeGlow)" />'
+        f'<circle cx="{num(kx)}" cy="{num(ky - 12)}" r="10" fill="{AMBER}" />'
+        f'<path d="M{num(kx - 5)} {num(ky - 5)}h10l3.5 22h-17z" fill="{AMBER}" />'
     )
-    # 200 OK shows from the first landing until the second packet leaves; 403 flickers on, then
-    # holds until near the end of the loop.
-    ok, deny = pct(TO_OWN[1]), pct(TO_OTHER[1])
-    css = (
-        packet_css("pa", *TO_OWN)
-        + packet_css("pb", *TO_OTHER)
-        + f".ok,.okc{{animation:ok {LOOP}s ease-out infinite}}"
-        f"@keyframes ok{{0%,{ok - 0.5:.2f}%{{opacity:0}}{ok + 1:.2f}%{{opacity:1}}"
-        f"{ok + 32:.2f}%{{opacity:1}}{ok + 40:.2f}%,100%{{opacity:0}}}}"
-        f".deny,.denyc{{animation:deny {LOOP}s ease-out infinite}}"
-        f"@keyframes deny{{0%,{deny - 0.5:.2f}%{{opacity:0}}{deny + 0.6:.2f}%{{opacity:1}}"
-        f"{deny + 3:.2f}%{{opacity:.45}}{deny + 5:.2f}%{{opacity:1}}"
-        f"{deny + 26:.2f}%{{opacity:1}}{deny + 33:.2f}%,100%{{opacity:0}}}}"
-        ".policy{animation:march 1.6s linear infinite}"
-        "@keyframes march{to{stroke-dashoffset:-20}}"
-        ".kglow{animation:kglow 4s ease-in-out infinite}"
-        "@keyframes kglow{0%,100%{opacity:.55}50%{opacity:1}}"
-    )
+
+    steps = [
+        ("BUCKET", 30.0, CYAN_2),
+        ("VERSIONING", 100.0, CYAN_2),
+        ("BUCKET POLICY", 170.0, CYAN_2),
+        ("SCOPED KEY", 240.0, AMBER_2),
+    ]
+    labels = []
+    for k, (label, at, colour) in enumerate(steps):
+        ax, ay = surface(at, -1.05)
+        width = mono_width(len(label), 10.5, 1.2) - 1.2 + 16
+        bx = 600.0
+        by = ay - 10
+        labels.append(
+            f'<g class="st" style="animation-delay:{k * loop / len(steps) - loop:.2f}s">'
+            f'<path d="M{num(bx + width)} {num(ay)}H{num(ax - 4)}" fill="none" stroke="{colour}" '
+            'stroke-opacity="0.5" stroke-width="1" />'
+            f'<circle cx="{num(ax)}" cy="{num(ay)}" r="3" fill="{colour}" />'
+            f'<circle class="ping" cx="{num(ax)}" cy="{num(ay)}" r="3" fill="none" '
+            f'stroke="{colour}" stroke-width="1.1" />' + chip(bx, by, label, colour) + "</g>"
+        )
+
     defs = [
         *gradient(
-            "radialGradient",
-            'id="keyGlow" cx="0.5" cy="0.5" r="0.5"',
-            [("0", AMBER, "0.6"), ("0.4", AMBER, "0.16"), ("1", AMBER, "0")],
+            "linearGradient",
+            'id="monoBody" x1="0" y1="0" x2="1" y2="0"',
+            [("0", "#081322", ""), ("0.5", "#0E2036", ""), ("1", "#081322", "")],
         ),
         *gradient(
             "radialGradient",
-            'id="floorGlow" cx="0.5" cy="0.5" r="0.5"',
-            [("0", CYAN_3, "0.3"), ("1", CYAN_3, "0")],
+            'id="mouth" cx="0.5" cy="0.62" r="0.6"',
+            [("0", "#02060C", ""), ("0.7", "#061020", ""), ("1", "#0B2033", "")],
         ),
+        *gradient(
+            "linearGradient",
+            'id="rimGrad" x1="0" y1="0" x2="1" y2="1"',
+            [("0", CYAN, ""), ("1", CYAN_3, "")],
+        ),
+        *gradient(
+            "linearGradient",
+            'id="bandGrad" x1="0" y1="0" x2="1" y2="0"',
+            [("0", CYAN_3, "0.15"), ("0.5", CYAN, "0.95"), ("1", CYAN_3, "0.15")],
+        ),
+        *gradient(
+            "radialGradient",
+            'id="keyholeGlow" cx="0.5" cy="0.5" r="0.5"',
+            [("0", AMBER, "0.7"), ("0.35", AMBER, "0.22"), ("1", AMBER, "0")],
+        ),
+        *gradient(
+            "radialGradient",
+            'id="aura" cx="0.5" cy="0.45" r="0.5"',
+            [("0", CYAN_3, "0.32"), ("0.6", CYAN_3, "0.1"), ("1", CYAN_3, "0")],
+        ),
+        f'    <clipPath id="monoClip"><path d="{silhouette}" /></clipPath>',
     ]
-    key = (
-        f'<circle class="kglow" cx="{num(kx)}" cy="{num(ky)}" r="40" fill="url(#keyGlow)" />'
-        f'<g transform="translate({num(kx - 17)} {num(ky - 17)}) rotate(-12 17 17)" fill="none" '
-        f'stroke="{AMBER_2}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'
-        '<circle cx="10" cy="22" r="7" /><path d="M15 17L31 2M26 7l4 4M21.5 11.5l3 3" /></g>'
-        f'<text class="mono" x="{num(kx)}" y="{num(ky + 36)}" text-anchor="middle" '
-        f'font-size="10.5" letter-spacing="1.2" fill="{AMBER_2}">AKIA…EXAMPLE</text>'
-    )
-    routes = "".join(
-        f'<path d="{d}" fill="none" stroke="{AMBER}" stroke-opacity="{opacity}" '
-        'stroke-width="1.1" stroke-dasharray="3 4" />'
-        for d, opacity in ((to_own, 0.28), (to_other, 0.2))
-    )
-    chips = chip(ox - 112, oy - 78, "200 OK", GREEN, "okc")
-    chips += chip(tx - 66, ty - 82, "403 AccessDenied", RED, "denyc")
-    glow = (
-        f'<ellipse cx="{num(ISO_O[0])}" cy="{num(ISO_O[1] + 20)}" rx="300" ry="150" '
-        'fill="url(#floorGlow)" />'
+    css = (
+        f".sc{{opacity:0;animation:sc {loop}s linear infinite}}"
+        f"@keyframes sc{{0%{{opacity:0}}1.5%{{opacity:.85}}9%{{opacity:0}}100%{{opacity:0}}}}"
+        ".kh{animation:kh 3s ease-in-out infinite}"
+        "@keyframes kh{0%,100%{opacity:.6}50%{opacity:1}}"
+        f".st{{animation:st {loop}s ease-out infinite}}"
+        f"@keyframes st{{0%{{opacity:1}}20%{{opacity:1}}30%{{opacity:.45}}100%{{opacity:.45}}}}"
+        ".ping{transform-box:fill-box;transform-origin:center;opacity:0;"
+        f"animation:ping {loop}s ease-out infinite;animation-delay:inherit}}"
+        "@keyframes ping{0%{opacity:.9;transform:scale(1)}14%{opacity:0;transform:scale(4.5)}"
+        "100%{opacity:0;transform:scale(4.5)}}"
     )
     scene = "".join(
         [
-            glow,
-            f'<g>{"".join(tiles)}</g>',
-            dot_paths(dots, {0: (0.16, 1.1), 1: (0.4, 1.2)}),
+            f'<ellipse cx="{num(cx)}" cy="{num(top + 150)}" rx="330" ry="230" fill="url(#aura)" />',
+            f'<path d="{silhouette}" fill="url(#monoBody)" />',
+            f'<path d="{silhouette}" fill="none" stroke="{CYAN}" stroke-opacity="0.35" '
+            'stroke-width="1.2" />',
+            f'<g clip-path="url(#monoClip)">{field}{bands}{"".join(scans)}</g>',
+            f'<ellipse cx="{num(cx)}" cy="{num(top)}" rx="{num(rx0)}" ry="{num(rx0 * MONO_RY)}" '
+            'fill="url(#mouth)" stroke="url(#rimGrad)" stroke-width="2.6" />',
+            keyhole,
             "".join(labels),
-            routes,
-            packet("pa", to_own),
-            packet("pb", to_other),
-            key,
-            chips,
         ]
     )
-    return defs, css, scene, [(640, 40, 1170, 380)]
+    return defs, css, scene, [(cx - rx0 - 20, top - 50, cx + rx0 + 20, bottom + 40)]
 
 
 # Copy
 
 CARD = {
-    "title": "s3ctl - one key, one bucket",
+    "title": "s3ctl - no console clicking, no IAM drift",
     "desc": (
-        "A floor of bucket slabs. An access key reaches its own bucket, app-data, with 200 OK, "
-        "and is refused by the bucket billing with 403 AccessDenied."
+        "The s3ctl bucket mark drawn as a large dotted bucket with an amber keyhole, scanned from "
+        "top to bottom, with the steps s3ctl runs: bucket, versioning, bucket policy, scoped key."
     ),
-    "headline": ("One ", "key,", "", "one bucket."),
+    "headline": ("No ", "console", " clicking.", "No IAM drift."),
     "body": [
-        [("Each key's policy names one bucket, so a leaked key", False)],
-        [("gets ", False), ("403 AccessDenied", True), (" everywhere else.", False)],
+        [("Buckets, versioning, policies and scoped keys from", False)],
+        [
+            ("flags, JSON or a CSV batch. ", False),
+            ("--dry-run", True),
+            (" shows the plan first.", False),
+        ],
     ],
-    "meta": ["BUCKET-READONLY", "BUCKET-READWRITE", "BUCKET-ADMIN"],
-    "scene": scene_isolation,
+    "meta": ["PLAN", "CREATE", "ROTATE", "DELETE"],
+    "scene": scene_monolith,
 }
 
 
