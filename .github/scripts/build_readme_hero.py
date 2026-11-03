@@ -631,6 +631,7 @@ def main() -> None:
     if "http://" in svg.replace("http://www.w3.org/2000/svg", "") or "https://" in svg:
         raise SystemExit("external reference found in the hero SVG")
     ET.fromstring(svg)  # well-formed, or this raises
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(svg, encoding="utf-8")
     print(f"Wrote {OUTPUT.relative_to(ROOT)} ({len(svg.encode()) / 1024:.1f} KiB)")
 
