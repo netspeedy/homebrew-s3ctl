@@ -29,9 +29,14 @@ The formula installs a prebuilt binary on macOS (Apple silicon and Intel) and Li
 
 Plan a bucket and its scoped credentials without changing anything:
 
-```console
-$ s3ctl --bucket app-data --create-scoped-credentials \
-    --endpoint https://objects.example.com --dry-run
+```bash
+s3ctl --bucket app-data --create-scoped-credentials \
+  --endpoint https://objects.example.com --dry-run
+```
+
+It prints the plan:
+
+```text
 S3 Provisioning Result
 ======================
 Resources: 1
