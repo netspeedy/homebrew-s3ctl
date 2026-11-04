@@ -76,7 +76,7 @@ brew untap netspeedy/s3ctl
 
 This repository only packages [`Formula/s3ctl.rb`](Formula/s3ctl.rb). The s3ctl release workflow rewrites it for each stable [release](https://github.com/netspeedy/s3ctl/releases); release candidates aren't published here. The APT repository, install script and container image are described in the [installation guide](https://netspeedy.github.io/s3ctl/installation/). Please open issues in the [main repository](https://github.com/netspeedy/s3ctl/issues).
 
-The banner at the top of this page and the repository's social preview image are generated. Edit the copy, layout or timing in `.github/scripts/build_readme_hero.py` and run it to rebuild `assets/s3ctl-readme-hero.svg` and `assets/s3ctl-social-preview.png`; the preview is uploaded by hand under Settings, since GitHub has no API for it. Run it with `uv run .github/scripts/build_readme_hero.py`, which installs the pinned fontTools it subsets the fonts with. The fonts come from assets.netspeedy.io, so the first run needs network access, and the preview is rendered with headless Chrome or Chromium.
+The banner at the top of this page and the repository's social preview image are generated. Edit the copy, layout or timing in `.github/scripts/build_readme_hero.py` and run it to rebuild `assets/s3ctl-readme-hero.svg` and `assets/s3ctl-social-card.png`; the card is uploaded by hand under Settings, since GitHub has no API for it. Run it with `uv run .github/scripts/build_readme_hero.py`, which installs the pinned fontTools it subsets the fonts with. The fonts come from assets.netspeedy.io, so the first run needs network access, and the card is rendered with headless Chrome or Chromium.
 
 ## License
 
