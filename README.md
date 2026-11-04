@@ -76,7 +76,7 @@ brew untap netspeedy/s3ctl
 
 This repository only packages [`Formula/s3ctl.rb`](Formula/s3ctl.rb). The s3ctl release workflow rewrites it for each stable [release](https://github.com/netspeedy/s3ctl/releases); release candidates aren't published here. The APT repository, install script and container image are described in the [installation guide](https://github.com/netspeedy/s3ctl/blob/main/docs/installation.md). Please open issues in the [main repository](https://github.com/netspeedy/s3ctl/issues).
 
-The banner at the top of this page is generated. Edit the copy, layout or timing in `.github/scripts/build_readme_hero.py` and run it to rebuild `assets/s3ctl-readme-hero.svg`. It downloads the font subsets from Google Fonts, so it needs network access.
+The banner at the top of this page and the repository's social preview image are generated. Edit the copy, layout or timing in `.github/scripts/build_readme_hero.py` and run it to rebuild `assets/s3ctl-readme-hero.svg` and `assets/s3ctl-social-preview.png`; the preview is uploaded by hand under Settings, since GitHub has no API for it. The script downloads the font subsets from Google Fonts, so it needs network access, and renders the preview with headless Chrome or Chromium.
 
 ## License
 
