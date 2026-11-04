@@ -56,7 +56,7 @@ Access key ID: (generated on apply)
 Secret access key: (generated on apply)
 ```
 
-Drop `--dry-run` to create the bucket and print the new key. s3ctl finds credentials the same way the AWS CLI does, or you can pass `--profile`. Add `--output json` if a script is reading the result. For OVHcloud, pass `--provider ovh`, an OVHcloud region such as `--region UK`, and `--ovh-service-name` with your Public Cloud project ID. `s3ctl --help` has the common workflows, and the [usage guide](https://github.com/netspeedy/s3ctl/blob/main/docs/usage.md) covers batch files, credential rotation and safe deletion.
+Drop `--dry-run` to create the bucket and print the new key. s3ctl finds credentials the same way the AWS CLI does, or you can pass `--profile`. Add `--output json` if a script is reading the result. For OVHcloud, pass `--provider ovh`, an OVHcloud region such as `--region UK`, and `--ovh-service-name` with your Public Cloud project ID. `s3ctl --help` has the common workflows, and the [docs](https://netspeedy.github.io/s3ctl/) cover batch files, credential rotation and safe deletion.
 
 ## Upgrade or remove
 
@@ -74,7 +74,7 @@ brew untap netspeedy/s3ctl
 
 ## About this tap
 
-This repository only packages [`Formula/s3ctl.rb`](Formula/s3ctl.rb). The s3ctl release workflow rewrites it for each stable [release](https://github.com/netspeedy/s3ctl/releases); release candidates aren't published here. The APT repository, install script and container image are described in the [installation guide](https://github.com/netspeedy/s3ctl/blob/main/docs/installation.md). Please open issues in the [main repository](https://github.com/netspeedy/s3ctl/issues).
+This repository only packages [`Formula/s3ctl.rb`](Formula/s3ctl.rb). The s3ctl release workflow rewrites it for each stable [release](https://github.com/netspeedy/s3ctl/releases); release candidates aren't published here. The APT repository, install script and container image are described in the [installation guide](https://netspeedy.github.io/s3ctl/installation/). Please open issues in the [main repository](https://github.com/netspeedy/s3ctl/issues).
 
 The banner at the top of this page and the repository's social preview image are generated. Edit the copy, layout or timing in `.github/scripts/build_readme_hero.py` and run it to rebuild `assets/s3ctl-readme-hero.svg` and `assets/s3ctl-social-preview.png`; the preview is uploaded by hand under Settings, since GitHub has no API for it. Run it with `uv run .github/scripts/build_readme_hero.py`, which installs the pinned fontTools it subsets the fonts with. The fonts come from assets.netspeedy.io, so the first run needs network access, and the preview is rendered with headless Chrome or Chromium.
 
